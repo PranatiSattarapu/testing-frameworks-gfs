@@ -1,0 +1,13 @@
+{
+  "session_name": "2025-11-12_13-54-42",
+  "messages": [
+    {
+      "role": "user",
+      "content": "medications used?"
+    },
+    {
+      "role": "assistant",
+      "content": "According to Rajesh Malhotra's medical history, he is currently taking the following medications and supplements:\n\n1. Ashwagandha - Supplement, taken occasionally as needed \n2. Multivitamin - Supplement, 1 tablet taken daily\n\nThe record indicates he is not taking any prescription medications at this time. The notes mention he was diagnosed with Stage 2 Hypertension in April 2025 and has been trying lifestyle modifications first before starting medication treatment."
+    }
+  ]
+}

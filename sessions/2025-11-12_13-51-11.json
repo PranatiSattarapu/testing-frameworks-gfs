@@ -1,0 +1,13 @@
+{
+  "session_name": "2025-11-12_13-51-11",
+  "messages": [
+    {
+      "role": "user",
+      "content": "what is the patients current medication\n"
+    },
+    {
+      "role": "assistant",
+      "content": "Based on the provided medical history for Rajesh Malhotra, his current medications include:\n\n1. Ashwagandha (Supplement) \n   - Dose: Occasional\n   - Frequency: As needed\n\n2. Multivitamin (Supplement)\n   - Dose: 1 tablet \n   - Frequency: Daily\n\nThe patient is not currently taking any prescription medications. The notes indicate he was motivated to try lifestyle changes before starting medication after discovering elevated blood pressure during a corporate health screening."
+    }
+  ]
+}

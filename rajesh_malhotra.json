@@ -1,0 +1,52 @@
+{
+  "name": "Rajesh Malhotra",
+  "age": 45,
+  "gender": "Male",
+  "ethnicity": "South Asian (North Indian)",
+  "condition": "Early-stage hypertension with borderline readings; mild weight gain over past 3 years; stress-related cardiovascular risk",
+  "medication": "None currently prescribed; takes occasional Ashwagandha supplements and multivitamin",
+  "baseline_bp": "136/88 mmHg",
+  "bp_range": "132-142/84-92 mmHg",
+  "current_bp": "160/102 mmHg (Week 23-24)",
+  "weight": 95.0,
+  "height": 172.0,
+  "height_unit": "cm",
+  "bmi": 32.2,
+  "resting_pulse": "95 bpm",
+  "cholesterol": {
+    "total": 215,
+    "ldl": 135,
+    "hdl": 42
+  },
+  "sleep": "3.5 hours per night (severe deprivation)",
+  "activity_level": "1,800 steps daily (down from 4,200); primarily sedentary office work 9-10 hours",
+  "daily_steps": "1,800",
+  "diet": "Mixed vegetarian and non-vegetarian North Indian diet; frequent restaurant meals and food delivery 4-5 times weekly; moderate to high salt intake; consumes 2-3 cups of chai daily; occasional alcohol (2-3 drinks on weekends)",
+  "symptoms": "Daily headaches, recent dizziness episodes",
+  "occupation": "Senior Project Manager, IT consulting",
+  "work_hours": "9-10 hours daily with frequent deadlines",
+  "family_history": {
+    "father": "Hypertension diagnosed at age 52, on dual therapy",
+    "mother": "Type 2 Diabetes diagnosed at age 58",
+    "paternal_uncle": "MI at age 60",
+    "heart_disease": "Paternal uncle - MI at age 60",
+    "diabetes": "Mother - Type 2 Diabetes diagnosed at age 58"
+  },
+  "environmental_factors": {
+    "smoking_status": "Never smoked",
+    "air_quality": {
+      "april_september": "AQI 200 (moderate pollution)",
+      "october_march": "AQI 500 (hazardous pollution)",
+      "exposure_period": "Year-round high pollution exposure"
+    }
+  },
+  "goals": "Improve lifestyle before starting medication; reduce BP naturally; better sleep; increase activity",
+  "barriers": "Work stress, inconsistent schedule, reliance on takeout during deadlines",
+  "six_month_trend": {
+    "bp_change": "+24/+14 mmHg (worsening)",
+    "weight_change": "+8 kg (worsening)",
+    "steps_change": "-2,400 steps/day (worsening)",
+    "sleep_change": "-2 hours/night (worsening)",
+    "overall": "Significant deterioration across all metrics"
+  }
+}
