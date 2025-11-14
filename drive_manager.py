@@ -3,6 +3,8 @@ from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 from google.oauth2 import service_account
 import os
 import io
+import json
+import streamlit as st
 
 # ----------------------------------------------------------------------
 # 1. Configuration (IDs and Scopes)
@@ -20,17 +22,18 @@ def list_data_files_cached():
 # 2. Authentication and Service Initialization
 # ----------------------------------------------------------------------
 def get_drive_service():
-    """Authenticates using the service account key and returns the Drive service object."""
+    """Loads Google service account from Streamlit Secrets."""
     try:
-        creds = service_account.Credentials.from_service_account_file(
-            "service_account_key.json", scopes=SCOPES
+        service_account_info = json.loads(st.secrets["GOOGLE_SERVICE_ACCOUNT"])
+        creds = service_account.Credentials.from_service_account_info(
+            service_account_info,
+            scopes=SCOPES
         )
         service = build("drive", "v3", credentials=creds)
         return service
     except Exception as e:
-        print(f"Error initializing Google Drive Service: {e}")
+        print(f"Error initializing Google Drive service: {e}")
         return None
-
 # ----------------------------------------------------------------------
 # 3. Core Utility Functions
 # ----------------------------------------------------------------------

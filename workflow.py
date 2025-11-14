@@ -2,8 +2,10 @@ from anthropic import Anthropic
 import io
 from drive_manager import list_data_files, get_drive_service, get_framework_content, api_get_file_content
 import os
+import streamlit as st
 
-client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+
+client = Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
 
 def generate_response(user_query):
     """Combine framework, drive content, and user query, then get Claude's answer (with logging)."""
