@@ -192,16 +192,16 @@ import os
 import io
 import json
 import streamlit as st
-st.write("🔑 GOOGLE KEY IN SECRETS:", "GOOGLE_SERVICE_ACCOUNT" in st.secrets)
+# st.write("🔑 GOOGLE KEY IN SECRETS:", "GOOGLE_SERVICE_ACCOUNT" in st.secrets)
 
-try:
-    data = json.loads(st.secrets["GOOGLE_SERVICE_ACCOUNT"])
-    st.write("🟢 JSON LOAD SUCCESS")
-except Exception as e:
-    st.write("🔴 JSON LOAD ERROR:", str(e))
+# try:
+#     data = json.loads(st.secrets["GOOGLE_SERVICE_ACCOUNT"])
+#     st.write("🟢 JSON LOAD SUCCESS")
+# except Exception as e:
+#     st.write("🔴 JSON LOAD ERROR:", str(e))
 
-service = get_drive_service()
-st.write("📁 DRIVE SERVICE:", service)
+# service = get_drive_service()
+# st.write("📁 DRIVE SERVICE:", service)
 # ----------------------------------------------------------------------
 # 1. Configuration (IDs and Scopes)
 # ----------------------------------------------------------------------
