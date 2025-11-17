@@ -27,45 +27,18 @@ else:
 st.divider()
 
 # --- Main Area: Chat Interface ---
+# --- Main Chat Interface ---
 
 active_messages = st.session_state.sessions[st.session_state.current_session]
 
-# FIXED BOTTOM BAR CSS
-st.markdown("""
-<style>
-.bottom-bar {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    padding: 10px 20px 15px 20px;
-    background: white;
-    border-top: 1px solid #ddd;
-    z-index: 999;
-}
-
-.chat-space {
-    padding-bottom: 130px; /* EXACT height of bottom bar */
-    margin-bottom: 0;
-}
-</style>
-""", unsafe_allow_html=True)
-
-
-# ---------------- CHAT HISTORY ----------------
-st.markdown('<div class="chat-space">', unsafe_allow_html=True)
-
+# 1️⃣ CHAT MESSAGES (always on top)
 for message in active_messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-st.markdown('</div>', unsafe_allow_html=True)
 
-# ---------------- FIXED BOTTOM BAR ----------------
-st.markdown('<div class="bottom-bar">', unsafe_allow_html=True)
-
-# Quick Questions
-st.markdown("** Quick Questions**")
+# 2️⃣ QUICK QUESTIONS (always ABOVE chat input)
+st.markdown("### Quick Questions")
 
 preset_questions = [
     "Prepare me for my doctor's visit",
@@ -84,21 +57,20 @@ for i, q in enumerate(preset_questions):
         st.session_state.preset_query = q
         st.rerun()
 
-# Chat input (ALWAYS visible)
-chatbox_input = st.chat_input("Enter your medical question:")
 
-st.markdown('</div>', unsafe_allow_html=True)
+# 3️⃣ CHAT INPUT (always at the bottom)
+chat_input = st.chat_input("Enter your medical question:")
 
-# ---------------- DECIDE QUERY ----------------
+# Decide final query
 query = None
-
 if st.session_state.preset_query:
     query = st.session_state.preset_query
     st.session_state.preset_query = None
-elif chatbox_input:
-    query = chatbox_input
+elif chat_input:
+    query = chat_input
 
-# ---------------- PROCESS QUERY ----------------
+
+# 4️⃣ PROCESS QUERY
 if query:
     active_messages.append({"role": "user", "content": query})
 
@@ -108,6 +80,7 @@ if query:
     with st.chat_message("assistant"):
         with st.spinner("Claude is thinking..."):
             answer = generate_response(query)
+
         st.markdown(answer)
 
     active_messages.append({"role": "assistant", "content": answer})
