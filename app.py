@@ -81,6 +81,22 @@ active_messages = st.session_state.sessions[st.session_state.current_session]
 for message in active_messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
+st.subheader("Quick Questions")
+
+preset_questions = [
+    "Prepare me for my doctor's visit",
+    "What's my health summary?",
+    "What should I ask my doctor?",
+    "Summarize my recent metrics",
+]
+
+cols = st.columns(len(preset_questions))
+
+clicked_question = None
+for i, q in enumerate(preset_questions):
+    if cols[i].button(q):
+        clicked_question = q
+
 
 # 3. Handle new query submission via st.chat_input
 query = st.chat_input("Enter your medical question:")
