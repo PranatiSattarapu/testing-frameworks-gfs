@@ -49,35 +49,37 @@ active_messages = st.session_state.sessions[st.session_state.current_session]
 
 # 2. Display previous messages for the active session
 # --- 2. Display previous messages for the active session ---
+# --- Placeholder for chat history ---
 for message in active_messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
+# Create a placeholder container pinned at the bottom
+bottom_container = st.container()
 
-# --- Quick Questions placed ABOVE chatbox ---
-st.markdown("### Quick Questions")
+with bottom_container:
+    st.markdown("### Quick Questions")
+    
+    preset_questions = [
+        "Prepare me for my doctor's visit",
+        "What's my health summary?",
+        "What should I ask my doctor?",
+        "Summarize my recent metrics",
+    ]
 
-preset_questions = [
-    "Prepare me for my doctor's visit",
-    "What's my health summary?",
-    "What should I ask my doctor?",
-    "Summarize my recent metrics",
-]
+    cols = st.columns(len(preset_questions))
 
-cols = st.columns(len(preset_questions))
+    # Store preset click in session_state
+    if "preset_query" not in st.session_state:
+        st.session_state.preset_query = None
 
-# Store preset click in session_state
-if "preset_query" not in st.session_state:
-    st.session_state.preset_query = None
+    for i, q in enumerate(preset_questions):
+        if cols[i].button(q):
+            st.session_state.preset_query = q
+            st.rerun()
 
-for i, q in enumerate(preset_questions):
-    if cols[i].button(q):
-        st.session_state.preset_query = q
-        st.rerun()
-
-
-# --- Chat Input (always visible!) ---
-chatbox_input = st.chat_input("Enter your medical question:")
+    # --- Chat Input ALWAYS visible ---
+    chatbox_input = st.chat_input("Enter your medical question:")
 
 # Decide which query to send
 query = None
