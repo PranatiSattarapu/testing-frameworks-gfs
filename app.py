@@ -24,36 +24,6 @@ if "sessions" not in st.session_state:
 if "current_session" not in st.session_state:
     st.session_state.current_session = "Session 1"
 
-# --- Sidebar: Session Management ---
-# st.sidebar.header("💬 Chat Session Management")
-
-# # A. Session Selector
-# session_names = list(st.session_state.sessions.keys())
-# selected_session = st.sidebar.selectbox(
-#     "Select or Create Session",
-#     options=session_names + ["+ New Session"],
-#     index=session_names.index(st.session_state.current_session) if st.session_state.current_session in session_names else 0
-# )
-
-# # B. Handle New Session Creation
-# if selected_session == "+ New Session":
-#     new_session_num = len(st.session_state.sessions) + 1
-#     new_session_name = f"Session {new_session_num}"
-#     st.session_state.sessions[new_session_name] = []
-#     st.session_state.current_session = new_session_name
-#     st.rerun()
-# elif selected_session != st.session_state.current_session:
-#     st.session_state.current_session = selected_session
-
-# # C. Display Current Session Status
-# st.sidebar.markdown(f"**Active Session:** **{st.session_state.current_session}**")
-
-# # D. Clear Session Button
-# if st.sidebar.button(f"🗑️ Clear **{st.session_state.current_session}** Chat"):
-#     st.session_state.sessions[st.session_state.current_session] = []
-#     st.rerun()
-
-# st.sidebar.divider()
 
 # --- Sidebar: Document Management (Read-Only) ---
 st.sidebar.header("📂 Current Document Context")
@@ -78,11 +48,14 @@ st.divider()
 active_messages = st.session_state.sessions[st.session_state.current_session]
 
 # 2. Display previous messages for the active session
+# --- 2. Display previous messages for the active session ---
 for message in active_messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
-# --- Quick Questions ---
-st.subheader("Quick Questions")
+
+
+# --- Quick Questions placed ABOVE chatbox ---
+st.markdown("### Quick Questions")
 
 preset_questions = [
     "Prepare me for my doctor's visit",
@@ -93,7 +66,7 @@ preset_questions = [
 
 cols = st.columns(len(preset_questions))
 
-# store preset click in session_state
+# Store preset click in session_state
 if "preset_query" not in st.session_state:
     st.session_state.preset_query = None
 
@@ -103,17 +76,17 @@ for i, q in enumerate(preset_questions):
         st.rerun()
 
 
-# --- Chat Input (always visible) ---
-chatbox = st.chat_input("Enter your medical question:")
+# --- Chat Input (always visible!) ---
+chatbox_input = st.chat_input("Enter your medical question:")
 
-# Decide final query
+# Decide which query to send
 query = None
-
 if st.session_state.preset_query:
     query = st.session_state.preset_query
-    st.session_state.preset_query = None  # clear after using
-elif chatbox:
-    query = chatbox
+    st.session_state.preset_query = None  # clear it after using
+elif chatbox_input:
+    query = chatbox_input
+
 
 
 # --- Process query ---
