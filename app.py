@@ -26,68 +26,86 @@ else:
 
 st.divider()
 
-# --- Main Chat Interface ---
+# --- Main Area: Chat Interface ---
+
 active_messages = st.session_state.sessions[st.session_state.current_session]
 
-# Containers
-chat_container = st.container()      # history
-bottom_container = st.container()    # quick questions + chat input
+# FIXED BOTTOM BAR CSS
+st.markdown("""
+<style>
+.bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 15px 20px;
+    background: white;
+    border-top: 1px solid #ddd;
+    z-index: 999;
+}
+.chat-space {
+    padding-bottom: 160px; /* space for bottom bar */
+}
+</style>
+""", unsafe_allow_html=True)
 
 # ---------------- CHAT HISTORY ----------------
-with chat_container:
-    for message in active_messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+st.markdown('<div class="chat-space">', unsafe_allow_html=True)
 
-# ---------------- BOTTOM AREA ----------------
-with bottom_container:
+for message in active_messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
-    st.markdown("### Quick Questions")
+st.markdown('</div>', unsafe_allow_html=True)
 
-    preset_questions = [
-        "Prepare me for my doctor's visit",
-        "What's my health summary?",
-        "What should I ask my doctor?",
-        "Summarize my recent metrics",
-    ]
+# ---------------- FIXED BOTTOM BAR ----------------
+st.markdown('<div class="bottom-bar">', unsafe_allow_html=True)
 
-    cols = st.columns(len(preset_questions))
+# Quick Questions
+st.markdown("#### Quick Questions")
 
-    # Track clicked preset question
-    if "preset_query" not in st.session_state:
-        st.session_state.preset_query = None
+preset_questions = [
+    "Prepare me for my doctor's visit",
+    "What's my health summary?",
+    "What should I ask my doctor?",
+    "Summarize my recent metrics",
+]
 
-    for i, q in enumerate(preset_questions):
-        if cols[i].button(q):
-            st.session_state.preset_query = q
-            st.rerun()
+cols = st.columns(len(preset_questions))
 
-    # Always-visible chatbox
-    chatbox_input = st.chat_input("Enter your medical question:")
+if "preset_query" not in st.session_state:
+    st.session_state.preset_query = None
 
-# Decide final query
+for i, q in enumerate(preset_questions):
+    if cols[i].button(q, key=f"preset_{i}"):
+        st.session_state.preset_query = q
+        st.rerun()
+
+# Chat input (ALWAYS visible)
+chatbox_input = st.chat_input("Enter your medical question:")
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+# ---------------- DECIDE QUERY ----------------
 query = None
 
 if st.session_state.preset_query:
     query = st.session_state.preset_query
-    st.session_state.preset_query = None  # reset after use
+    st.session_state.preset_query = None
 elif chatbox_input:
     query = chatbox_input
 
 # ---------------- PROCESS QUERY ----------------
 if query:
-    # Add user message
     active_messages.append({"role": "user", "content": query})
 
     with st.chat_message("user"):
         st.markdown(query)
 
-    # Generate and display response
     with st.chat_message("assistant"):
         with st.spinner("Claude is thinking..."):
             answer = generate_response(query)
         st.markdown(answer)
 
-    # Add assistant response to session
     active_messages.append({"role": "assistant", "content": answer})
     st.session_state.sessions[st.session_state.current_session] = active_messages
