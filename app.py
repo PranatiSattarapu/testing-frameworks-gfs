@@ -99,7 +99,14 @@ for i, q in enumerate(preset_questions):
 
 
 # 3. Handle new query submission via st.chat_input
-query = st.chat_input("Enter your medical question:")
+query = None
+
+# If user clicked a preset question → send it
+if clicked_question:
+    query = clicked_question
+else:
+    # Otherwise use chat input normally
+    query = st.chat_input("Enter your medical question:")
 
 if query:
     # --- A. Display User Message ---
