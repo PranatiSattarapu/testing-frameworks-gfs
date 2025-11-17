@@ -64,6 +64,7 @@ if "preset_query" not in st.session_state:
 for i, q in enumerate(preset_questions):
     if cols[i].button(q, key=f"preset_btn_{i}"):
         st.session_state.preset_query = q
+        # This rerun is necessary to activate the query flow from the button click
         st.rerun()
 
 # Always show chatbox
@@ -95,4 +96,4 @@ if query:
     active_messages.append({"role": "assistant", "content": answer})
 
     st.session_state.sessions[st.session_state.current_session] = active_messages
-    st.rerun()
+    # REMOVED: st.rerun() here is no longer needed because the chat input submission or the preset button click already triggered the necessary rerun.
