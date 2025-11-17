@@ -1,73 +1,116 @@
 from anthropic import Anthropic
 import io
-from drive_manager import list_data_files, get_drive_service, get_framework_content, api_get_file_content
 import os
 import streamlit as st
+from rapidfuzz import fuzz
 
+from drive_manager import (
+    list_data_files,
+    get_drive_service,
+    api_get_files_in_folder,
+    api_get_file_content,
+    FOLDER_ID_PROMPT_FRAMEWORK
+)
 
 client = Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
 
+
+# ---------------------------------------------------------
+# LOAD ALL FRAMEWORKS
+# ---------------------------------------------------------
+def load_frameworks():
+    """Load all framework files and extract function names."""
+    service = get_drive_service()
+    framework_files = api_get_files_in_folder(service, FOLDER_ID_PROMPT_FRAMEWORK)
+
+    frameworks = []
+
+    for f in framework_files:
+        content = api_get_file_content(service, f["id"], f["mimeType"])
+        first_line = content.split("\n")[0].strip()
+
+        if first_line.lower().startswith("function:"):
+            function_name = first_line.replace("Function:", "").strip()
+            frameworks.append({
+                "name": function_name,
+                "content": content
+            })
+
+    return frameworks
+
+
+# ---------------------------------------------------------
+# FUZZY MATCH CHOOSER
+# ---------------------------------------------------------
+def choose_best_framework(user_query, frameworks):
+    """Pick the closest matching framework using fuzzy matching."""
+    best_score = -1
+    best_framework = frameworks[0]
+
+    for fw in frameworks:
+        score = fuzz.partial_ratio(user_query.lower(), fw["name"].lower())
+        if score > best_score:
+            best_score = score
+            best_framework = fw
+
+    print(f"🔍 Fuzzy Score: {best_score} for {best_framework['name']}")
+    return best_framework
+
+
+# ---------------------------------------------------------
+# MAIN RESPONSE GENERATOR
+# ---------------------------------------------------------
 def generate_response(user_query):
-    """Combine framework, drive content, and user query, then get Claude's answer (with logging)."""
     print("\n🔍 Starting generate_response()")
     service = get_drive_service()
     files = list_data_files()
 
     print(f"📂 Total files found: {len(files)}")
-    for f in files:
-        print(f"   - {f['name']}  (source: {f.get('source','unknown')}, mimeType: {f.get('mimeType','?')})")
 
-    # --- 1. Get the framework (the structured instructions) ---
-    framework_text = get_framework_content()
+    # 1. Load and route frameworks
+    frameworks = load_frameworks()
+    best_fw = choose_best_framework(user_query, frameworks)
 
-    
+    chosen_framework_name = best_fw["name"]
+    framework_text = best_fw["content"]
+
+    print(f"🧠 Chosen Framework: {chosen_framework_name}")
+
+    # 2. System prompt with chosen framework
     system_prompt = f"""
-    You MUST strictly follow the framework provided below.
-    Do NOT ignore, modify, or override any part of it.
+You MUST strictly follow the framework provided below.
+Do NOT ignore, modify, or override any part of it.
 
-    === FRAMEWORK START ===
-    {framework_text}
-    === FRAMEWORK END ===
-    """
-    if framework_text.strip():
-        print("✅ Framework content loaded successfully.")
-        print(f"📏 Framework length: {len(framework_text)} characters")
-        # Check if it's actually text or binary garbage
-        if framework_text[:50].isprintable():
-            print(f"🧱 Framework preview:\n{framework_text[:400]}...\n")
-        else:
-            print("⚠️ Framework appears to be BINARY data, not text!")
-            print(f"🔍 First bytes (hex): {framework_text[:50].encode('utf-8', errors='ignore')}")
-    else:
-        print("⚠️ Framework content is EMPTY or not accessible!")
-    
-    # --- 2. Fetch patient data + guidelines text ---
+=== FRAMEWORK START: {chosen_framework_name} ===
+{framework_text}
+=== FRAMEWORK END ===
+"""
+
+    # 3. Load patient data + guidelines
     combined_text = ""
     for f in files:
-        # Only include patient data and guidelines in the user message
         if f.get('source') in ['patient_data', 'guidelines']:
             content = api_get_file_content(service, f["id"], f["mimeType"])
             combined_text += f"\n\n---\nDocument: {f['name']}\n{content}"
-            preview = content[:200] if isinstance(content, str) else str(content)[:200]
-            print(f"\n📄 Preview of {f['name']}:\n{preview}\n")
-    
-    print("🧠 Sending prompt to Claude...")
 
-    # --- 3. Build the user message with clear structure ---
+    # 4. Build user prompt
     user_message = f"""Here is the user's health data and relevant guidelines:
 
 {combined_text}
 
 ---
 
-User's question: {user_query}"""
+User's question: {user_query}
+"""
 
-    # --- 4. Send to Claude ---
+    print("🧠 Sending to Claude...")
+
+    # 5. Send to Claude
     response = client.messages.create(
-    model="claude-3-opus-20240229",
-    max_tokens=1000,
-    system=system_prompt,
-    messages=[{"role": "user", "content": user_message}],
-)
+        model="claude-3-opus-20240229",
+        max_tokens=1500,
+        system=system_prompt,
+        messages=[{"role": "user", "content": user_message}],
+    )
 
     return response.content[0].text
