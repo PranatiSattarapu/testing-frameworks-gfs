@@ -45,21 +45,26 @@ st.divider()
 # st.header(f"💬 Prompt Refinement: {st.session_state.current_session}")
 
 # Get the messages for the active session
+# --- Main Area: Chat Interface ---
+
 active_messages = st.session_state.sessions[st.session_state.current_session]
 
-# 2. Display previous messages for the active session
-# --- 2. Display previous messages for the active session ---
-# --- Placeholder for chat history ---
-for message in active_messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+# TOP: chat history
+chat_container = st.container()
 
-# Create a placeholder container pinned at the bottom
+# BOTTOM: preset questions + chatbox
 bottom_container = st.container()
 
+# -------------------- CHAT HISTORY --------------------
+with chat_container:
+    for message in active_messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+
+# -------------------- BOTTOM FIXED AREA --------------------
 with bottom_container:
     st.markdown("### Quick Questions")
-    
+
     preset_questions = [
         "Prepare me for my doctor's visit",
         "What's my health summary?",
@@ -69,7 +74,7 @@ with bottom_container:
 
     cols = st.columns(len(preset_questions))
 
-    # Store preset click in session_state
+    # Track clicked preset question
     if "preset_query" not in st.session_state:
         st.session_state.preset_query = None
 
@@ -78,20 +83,19 @@ with bottom_container:
             st.session_state.preset_query = q
             st.rerun()
 
-    # --- Chat Input ALWAYS visible ---
+    # Always show chatbox
     chatbox_input = st.chat_input("Enter your medical question:")
 
-# Decide which query to send
+# -------------------- DECIDE FINAL QUERY --------------------
 query = None
+
 if st.session_state.preset_query:
     query = st.session_state.preset_query
-    st.session_state.preset_query = None  # clear it after using
+    st.session_state.preset_query = None
 elif chatbox_input:
     query = chatbox_input
 
-
-
-# --- Process query ---
+# -------------------- PROCESS QUERY --------------------
 if query:
     active_messages.append({"role": "user", "content": query})
 
@@ -106,3 +110,5 @@ if query:
     active_messages.append({"role": "assistant", "content": answer})
 
     st.session_state.sessions[st.session_state.current_session] = active_messages
+
+
