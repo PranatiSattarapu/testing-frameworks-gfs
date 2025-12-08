@@ -1,151 +1,174 @@
+import json
+import csv
+from pathlib import Path
+from io import StringIO
+from google import genai
+from google.genai import types
 from anthropic import Anthropic
-import io
 import os
-import streamlit as st
-from rapidfuzz import fuzz
 
-from drive_manager import (
-    list_data_files,
-    get_drive_service,
-    api_get_files_in_folder,
-    api_get_file_content,
-    FOLDER_ID_PROMPT_FRAMEWORK
-)
+# ===============================
+# Configuration
+# ===============================
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+CLAUDE_API_KEY = os.getenv("CLAUDE_API_KEY")
+GUIDELINE_STORE_NAME = os.getenv("GUIDELINE_STORE_NAME")
+PATIENT_DATA_FOLDER = "user_data"
 
-client = Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
+client = genai.Client(api_key=GEMINI_API_KEY)
+claude = Anthropic(api_key=CLAUDE_API_KEY)
+
+# ===============================
+# Patient Data Helpers
+# ===============================
+def csv_to_llm_text(csv_data):
+    output = []
+    csvfile = StringIO(csv_data)
+    reader = csv.DictReader(csvfile)
+
+    if reader.fieldnames:
+        output.append("HEADERS: " + " | ".join(reader.fieldnames))
+        output.append("-" * 50)
+
+    for i, row in enumerate(reader):
+        row_details = [
+            f"{k.strip()}={str(v).strip()}"
+            for k, v in row.items()
+            if v and str(v).strip()
+        ]
+        output.append(f"ROW {i+1}: " + ", ".join(row_details))
+
+    return "\n".join(output)
 
 
-# ---------------------------------------------------------
-# LOAD ALL FRAMEWORKS
-# ---------------------------------------------------------
-def load_frameworks():
-    """Load all framework files, extract function names, and show detailed logs."""
-    print("\n========================")
-    print("🔎 Loading framework files...")
-    print("========================\n")
+def load_local_patient_data(folder_path=PATIENT_DATA_FOLDER):
+    patient_text = []
+    path = Path(folder_path)
 
-    service = get_drive_service()
+    if not path.is_dir():
+        return "\n--- PATIENT DATA: NONE FOUND ---\n"
 
-    print("📁 Framework folder ID:", FOLDER_ID_PROMPT_FRAMEWORK)
-
-    # Get files in the framework folder
-    framework_files = api_get_files_in_folder(service, FOLDER_ID_PROMPT_FRAMEWORK)
-
-    print("🗂 Files returned from Drive:", [f["name"] for f in framework_files])
-
-    frameworks = []
-
-    for f in framework_files:
-        print("\n--------------------------------")
-        print("📄 Reading file:", f["name"])
-        print("--------------------------------")
-
-        # Load full content
-        content = api_get_file_content(service, f["id"], f["mimeType"])
-
-        if not content:
-            print("⚠️ File content EMPTY or unreadable.")
+    for file_path in path.iterdir():
+        if not file_path.is_file() or file_path.name.startswith("."):
             continue
 
-        # Extract first line
-        first_line = content.split("\n")[0]
-        print("🔍 Raw first line:", repr(first_line))
+        try:
+            raw = file_path.read_text(encoding="utf-8")
 
-        # Remove BOM + whitespace
-        clean_first_line = first_line.lstrip("\ufeff").strip()
-        print("✨ Cleaned first line:", repr(clean_first_line))
+            if file_path.suffix.lower() == ".json":
+                content = json.dumps(json.loads(raw), indent=2)
+            elif file_path.suffix.lower() == ".csv":
+                content = csv_to_llm_text(raw)
+            else:
+                content = raw
 
-        # Check for Function header
-        if clean_first_line.lower().startswith("function:"):
-            function_name = clean_first_line.replace("Function:", "").strip()
-            print("✅ Framework detected. Function name:", function_name)
+            patient_text.append(
+                f"\n\n--- PATIENT FILE: {file_path.name} ---\n{content}"
+            )
 
-            frameworks.append({
-                "name": function_name,
-                "content": content
-            })
-        else:
-            print("❌ This file does NOT start with 'Function:' — skipped.")
+        except Exception as e:
+            print(f"⚠️ Failed to read {file_path.name}: {e}")
 
-    print("\n📊 Total frameworks loaded:", len(frameworks))
-    print("========================\n")
+    return "\n".join(patient_text) if patient_text else "\n--- PATIENT DATA: NONE FOUND ---\n"
 
-    return frameworks
+# ===============================
+# MAIN WORKFLOW (NO FALLBACK)
+# ===============================
+def generate_response(user_query, framework_override):
+    print("\n🔍 Starting generate_response")
 
+    if not framework_override or not framework_override.get("content"):
+        raise ValueError(
+            "No framework provided. User must define a framework in the UI."
+        )
 
+    framework_text = framework_override["content"]
+    framework_name = framework_override.get("name", "UI Framework")
 
-# ---------------------------------------------------------
-# FUZZY MATCH CHOOSER
-# ---------------------------------------------------------
-def choose_best_framework(user_query, frameworks):
-    """Pick the closest matching framework using fuzzy matching."""
-    best_score = -1
-    best_framework = frameworks[0]
+    print(f"🧠 Using framework: {framework_name}")
 
-    for fw in frameworks:
-        score = fuzz.partial_ratio(user_query.lower(), fw["name"].lower())
-        if score > best_score:
-            best_score = score
-            best_framework = fw
-
-    print(f"🔍 Fuzzy Score: {best_score} for {best_framework['name']}")
-    return best_framework
-
-
-# ---------------------------------------------------------
-# MAIN RESPONSE GENERATOR
-# ---------------------------------------------------------
-def generate_response(user_query):
-    print("\n🔍 Starting generate_response()")
-    service = get_drive_service()
-    files = list_data_files()
-
-    print(f"📂 Total files found: {len(files)}")
-
-    # 1. Load and route frameworks
-    frameworks = load_frameworks()
-    best_fw = choose_best_framework(user_query, frameworks)
-
-    chosen_framework_name = best_fw["name"]
-    framework_text = best_fw["content"]
-
-    print(f"🧠 Chosen Framework: {chosen_framework_name}")
-
-    # 2. System prompt with chosen framework
     system_prompt = f"""
-You MUST strictly follow the framework provided below.
-Do NOT ignore, modify, or override any part of it.
+You MUST strictly follow everything defined in the framework.
+Do NOT override format, tone, or safety rules.
 
-=== FRAMEWORK START: {chosen_framework_name} ===
+=== FRAMEWORK START: {framework_name} ===
 {framework_text}
 === FRAMEWORK END ===
 """
 
-    # 3. Load patient data + guidelines
-    combined_text = ""
-    for f in files:
-        if f.get('source') in ['patient_data', 'guidelines']:
-            content = api_get_file_content(service, f["id"], f["mimeType"])
-            combined_text += f"\n\n---\nDocument: {f['name']}\n{content}"
+    # ===============================
+    # Load patient data
+    # ===============================
+    patient_text = load_local_patient_data()
 
-    # 4. Build user prompt
-    user_message = f"""Here is the user's health data and relevant guidelines:
+    # ===============================
+    # Gemini FileSearch (Guidelines)
+    # ===============================
+    guideline_text = "No guideline chunks retrieved."
+    sources = set()
 
-{combined_text}
+    retrieval_prompt = f"""
+You MUST use the File Search tool.
+Do NOT answer from general knowledge.
 
----
+Search ADA clinical practice guidelines relevant to:
 
-User's question: {user_query}
+Query: {user_query}
+
+Patient context:
+{patient_text[:600]}
 """
 
-    print("🧠 Sending to Claude...")
+    try:
+        rag_resp = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=retrieval_prompt,
+            config=types.GenerateContentConfig(
+                tools=[{
+                    "fileSearch": {
+                        "fileSearchStoreNames": [GUIDELINE_STORE_NAME]
+                    }
+                }],
+                max_output_tokens=2000,
+                temperature=0.2
+            )
+        )
 
-    # 5. Send to Claude
-    response = client.messages.create(
-        model="claude-3-opus-20240229",
-        max_tokens=1500,
+        if rag_resp.candidates and rag_resp.candidates[0].grounding_metadata:
+            chunks = rag_resp.candidates[0].grounding_metadata.grounding_chunks
+            retrieved = []
+
+            for c in chunks:
+                retrieved.append(
+                    f"[From: {c.retrieved_context.title}]\n"
+                    f"{c.retrieved_context.text}"
+                )
+                sources.add(c.retrieved_context.title)
+
+            guideline_text = "\n\n---\n\n".join(retrieved)
+
+    except Exception as e:
+        print("⚠️ Gemini FileSearch error:", e)
+
+    # ===============================
+    # Claude Final Answer
+    # ===============================
+    final_prompt = f"""
+=== PATIENT DATA ===
+{patient_text}
+
+=== RETRIEVED GUIDELINES ===
+{guideline_text}
+
+User question:
+{user_query}
+"""
+
+    claude_resp = claude.messages.create(
+        model="claude-sonnet-4-20250514",
+        max_tokens=3000,
         system=system_prompt,
-        messages=[{"role": "user", "content": user_message}],
+        messages=[{"role": "user", "content": final_prompt}]
     )
 
-    return response.content[0].text
+    return claude_resp.content[0].text

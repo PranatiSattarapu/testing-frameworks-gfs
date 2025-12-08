@@ -1,0 +1,114 @@
+{
+  "patient_id": "M_001",
+  "name": "Meera Malhotra",
+  "medical_history": {
+    "chronic_conditions": [
+      {
+        "condition": "Type 2 Diabetes",
+        "diagnosed_date": "2011",
+        "status": "Active",
+        "management": "Standard of care"
+      }
+    ],
+    "past_conditions": [],
+    "surgeries": [],
+    "allergies": {
+      "medications": "None known",
+      "food": "None known",
+      "environmental": "None known"
+    },
+    "immunizations": {
+      "last_updated": "Not specified"
+    },
+    "family_history": {
+      "father": {
+        "conditions": [],
+        "age_at_diagnosis": null,
+        "current_age": null,
+        "medications": []
+      },
+      "mother": {
+        "conditions": [],
+        "age_at_diagnosis": null,
+        "current_age": null
+      },
+      "siblings": [],
+      "extended_family": {}
+    },
+    "social_history": {
+      "smoking": "Never",
+      "alcohol": "Rare (since age 60)",
+      "exercise": "Walking 2 times per week with friends, 30 minutes per session",
+      "occupation": "Retired",
+      "stress_level": "Not specified",
+      "marital_status": "Married",
+      "children": "Yes"
+    },
+    "recent_labs": {
+      "march_2025_annual_physical": {
+        "date": "2025-03-12",
+        "visit_type": "Annual Physical",
+        "results": {
+          "total_cholesterol": 245,
+          "ldl": 158,
+          "hdl": 48,
+          "triglycerides": 195,
+          "glucose_fasting": 142,
+          "hba1c": 7.2,
+          "creatinine": 1.1,
+          "egfr": 58,
+          "bun": 22,
+          "wbc": 7.2,
+          "rbc": 4.5,
+          "hemoglobin": 13.2,
+          "hematocrit": 39.5,
+          "platelets": 245,
+          "alt": 28,
+          "ast": 32
+        }
+      },
+      "september_2025_followup": {
+        "date": "2025-09-18",
+        "visit_type": "Lipid & Kidney Follow-up",
+        "results": {
+          "total_cholesterol": 238,
+          "ldl": 152,
+          "hdl": 50,
+          "triglycerides": 180,
+          "glucose_fasting": 138,
+          "hba1c": 7.0,
+          "creatinine": 1.2,
+          "egfr": 55,
+          "bun": 24,
+          "albumin": 4.1,
+          "urine_albumin_creatinine_ratio": 45,
+          "cystatin_c": 1.15
+        }
+      }
+    },
+    "medications_current": [
+      {
+        "name": "Multivitamin",
+        "type": "Supplement",
+        "dose": "1 tablet",
+        "frequency": "Daily"
+      },
+      {
+        "name": "Metformin hydrochloride",
+        "type": "Prescription",
+        "dose": "1000 mg",
+        "frequency": "Twice daily (with breakfast and dinner)"
+      }
+    ],
+    "medications_past": [],
+    "hospitalizations": [],
+    "notes": [
+      "Diagnosed with Type 2 Diabetes at age 58",
+      "Currently 72 years old",
+      "Manages diabetes with standard of care treatment",
+      "Maintains social exercise routine with friends",
+      "Reduced alcohol consumption since age 60"
+    ]
+  },
+  "last_updated": "2025-11-27"
+}
