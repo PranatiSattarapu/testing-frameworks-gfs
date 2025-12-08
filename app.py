@@ -26,7 +26,7 @@ st.sidebar.divider()
 st.sidebar.header("🧩 Prompt Framework")
 
 framework_text = st.sidebar.text_area(
-    "Framework (used as system prompt)",
+    "Framework",
     height=350,
     placeholder="""
 Role & Context:
@@ -57,14 +57,7 @@ if st.session_state.active_framework:
 # Sidebar: Document Context (read-only)
 # ===============================
 st.sidebar.divider()
-st.sidebar.header("📂 Current Document Context")
 
-files = list_data_files()
-if not files:
-    st.sidebar.info("No documents found in the shared folder yet.")
-else:
-    for f in files:
-        st.sidebar.markdown(f"📄 {f['name']}")
 
 # ===============================
 # Main Area: Chat Interface
