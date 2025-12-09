@@ -7,5 +7,5 @@ google-auth-httplib2
 python-docx
 rapidfuzz
 google-genai
-
+python-dotenv
 
