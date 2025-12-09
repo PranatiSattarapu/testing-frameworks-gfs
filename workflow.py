@@ -11,6 +11,7 @@ from google.genai import types
 from anthropic import Anthropic
 import os
 import logging
+import streamlit as st
 
 logging.basicConfig(
     level=logging.INFO,
@@ -25,7 +26,8 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 CLAUDE_API_KEY = os.getenv("CLAUDE_API_KEY")
 GUIDELINE_STORE_NAME = os.getenv("GUIDELINE_STORE_NAME")
 PATIENT_DATA_FOLDER = "user_data"
-
+st.write(f"Debug: Using store name: {GUIDELINE_STORE_NAME}")
+st.write(f"Debug: Gemini API Key present: {bool(GEMINI_API_KEY)}")
 client = genai.Client(api_key=GEMINI_API_KEY)
 claude = Anthropic(api_key=CLAUDE_API_KEY)
 logging.info("WORKFLOW VERSION = citation-enforced-v1")
@@ -174,7 +176,13 @@ Patient context:
             logging.info(
                 "FILESEARCH_RESULT | chunks_retrieved=%d",
                 len(chunks)
+            
             )
+                
+        # ADD THIS DEBUG:
+        if len(chunks) == 0:
+            logging.warning("⚠️ FILESEARCH RETURNED ZERO CHUNKS!")
+            print("⚠️ FileSearch returned 0 chunks - Claude will use framework examples")
 
             retrieved = []
 
