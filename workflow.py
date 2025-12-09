@@ -1,3 +1,7 @@
+from dotenv import load_dotenv
+load_dotenv()
+
+
 import json
 import csv
 from pathlib import Path
@@ -6,6 +10,13 @@ from google import genai
 from google.genai import types
 from anthropic import Anthropic
 import os
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(message)s"
+)
+
 
 # ===============================
 # Configuration
@@ -86,6 +97,10 @@ def generate_response(user_query, framework_override):
     framework_name = framework_override.get("name", "UI Framework")
 
     print(f"🧠 Using framework: {framework_name}")
+    logging.info("FRAMEWORK | source=UI | name=%s | length=%d",
+             framework_name,
+             len(framework_text))
+
 
     system_prompt = f"""
 You MUST strictly follow everything defined in the framework.
@@ -100,6 +115,11 @@ Do NOT override format, tone, or safety rules.
     # Load patient data
     # ===============================
     patient_text = load_local_patient_data()
+    if patient_text.strip():
+        logging.info("PATIENT_DATA | source=local_files | chars=%d",
+                    len(patient_text))
+    else:
+        logging.warning("PATIENT_DATA | NONE")
 
     # ===============================
     # Gemini FileSearch (Guidelines)
@@ -118,6 +138,11 @@ Query: {user_query}
 Patient context:
 {patient_text[:600]}
 """
+    logging.info(
+        "FILESEARCH | store=%s | query_chars=%d",
+        GUIDELINE_STORE_NAME,
+        len(user_query)
+    )
 
     try:
         rag_resp = client.models.generate_content(
@@ -135,10 +160,22 @@ Patient context:
         )
 
         if rag_resp.candidates and rag_resp.candidates[0].grounding_metadata:
+            
             chunks = rag_resp.candidates[0].grounding_metadata.grounding_chunks
+
+            logging.info(
+                "FILESEARCH_RESULT | chunks_retrieved=%d",
+                len(chunks)
+            )
+
             retrieved = []
 
             for c in chunks:
+                logging.info(
+                    "GUIDELINE_CHUNK | source=%s | text_chars=%d",
+                    c.retrieved_context.title,
+                    len(c.retrieved_context.text)
+                )
                 retrieved.append(
                     f"[From: {c.retrieved_context.title}]\n"
                     f"{c.retrieved_context.text}"
@@ -163,6 +200,8 @@ Patient context:
 User question:
 {user_query}
 """
+    logging.info("CLAUDE | final_synthesis | input_chars=%d",
+             len(final_prompt))
 
     claude_resp = claude.messages.create(
         model="claude-sonnet-4-20250514",
