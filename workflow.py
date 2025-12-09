@@ -109,6 +109,13 @@ Do NOT override format, tone, or safety rules.
 === FRAMEWORK START: {framework_name} ===
 {framework_text}
 === FRAMEWORK END ===
+CRITICAL RULES FOR SOURCES AND CITATIONS:
+
+- You MUST cite ONLY from the "RETRIEVED GUIDELINES" section below.
+- Do NOT invent, generalize, or reuse example citations from the framework.
+- Each citation MUST reference the exact document title provided in the retrieved guideline chunks.
+- If a statement cannot be supported by retrieved guideline text, explicitly state "No guideline citation available".
+
 """
 
     # ===============================
