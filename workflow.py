@@ -116,8 +116,6 @@ def generate_response(user_query, framework_override):
 
     The framework above contains example citations. DO NOT use those example names.
 
-    You MUST cite using these EXACT document titles (copy them exactly, including .pdf):
-    {chr(10).join(f"- {src}" for src in sorted(sources))}
 
     In your Sources section, use these exact filenames. Do not clean them up or change them.
 """
