@@ -28,6 +28,7 @@ PATIENT_DATA_FOLDER = "user_data"
 
 client = genai.Client(api_key=GEMINI_API_KEY)
 claude = Anthropic(api_key=CLAUDE_API_KEY)
+logging.info("WORKFLOW VERSION = citation-enforced-v1")
 
 # ===============================
 # Patient Data Helpers
