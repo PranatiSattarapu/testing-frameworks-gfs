@@ -104,21 +104,22 @@ def generate_response(user_query, framework_override):
              framework_name,
              len(framework_text))
 
-
     system_prompt = f"""
-You MUST strictly follow everything defined in the framework.
-Do NOT override format, tone, or safety rules.
+    You MUST strictly follow everything defined in the framework.
+    Do NOT override format, tone, or safety rules.
 
-=== FRAMEWORK START: {framework_name} ===
-{framework_text}
-=== FRAMEWORK END ===
-CRITICAL RULES FOR SOURCES AND CITATIONS:
+    === FRAMEWORK START: {framework_name} ===
+    {framework_text}
+    === FRAMEWORK END ===
 
-- You MUST cite ONLY from the "RETRIEVED GUIDELINES" section below.
-- Do NOT invent, generalize, or reuse example citations from the framework.
-- Each citation MUST reference the exact document title provided in the retrieved guideline chunks.
-- If a statement cannot be supported by retrieved guideline text, explicitly state "No guideline citation available".
+    CRITICAL CITATION RULES:
 
+    The framework above contains example citations. DO NOT use those example names.
+
+    You MUST cite using these EXACT document titles (copy them exactly, including .pdf):
+    {chr(10).join(f"- {src}" for src in sorted(sources))}
+
+    In your Sources section, use these exact filenames. Do not clean them up or change them.
 """
 
     # ===============================
