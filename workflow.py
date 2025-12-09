@@ -170,22 +170,20 @@ Patient context:
         )
 
         if rag_resp.candidates and rag_resp.candidates[0].grounding_metadata:
-            
             chunks = rag_resp.candidates[0].grounding_metadata.grounding_chunks
 
             logging.info(
                 "FILESEARCH_RESULT | chunks_retrieved=%d",
                 len(chunks)
-            
             )
-                
-        # ADD THIS DEBUG:
-        if len(chunks) == 0:
-            logging.warning("⚠️ FILESEARCH RETURNED ZERO CHUNKS!")
-            print("⚠️ FileSearch returned 0 chunks - Claude will use framework examples")
-
+            
+            # ADD THIS DEBUG (INSIDE the if block):
+            if len(chunks) == 0:
+                logging.warning("⚠️ FILESEARCH RETURNED ZERO CHUNKS!")
+                print("⚠️ FileSearch returned 0 chunks - Claude will use framework examples")
+            
             retrieved = []
-
+            
             for c in chunks:
                 logging.info(
                     "GUIDELINE_CHUNK | source=%s | text_chars=%d",
@@ -199,9 +197,14 @@ Patient context:
                 sources.add(c.retrieved_context.title)
 
             guideline_text = "\n\n---\n\n".join(retrieved)
+        else:
+            # ADD THIS: Handle case where grounding_metadata is missing
+            logging.warning("⚠️ NO GROUNDING METADATA IN RESPONSE!")
+            print("⚠️ Gemini response has no grounding_metadata")
 
     except Exception as e:
         print("⚠️ Gemini FileSearch error:", e)
+        logging.error("FILESEARCH_ERROR | error=%s", str(e))
 
     # ===============================
     # Claude Final Answer
