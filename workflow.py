@@ -177,7 +177,6 @@ Patient context:
                 len(chunks)
             )
             
-            # ADD THIS DEBUG (INSIDE the if block):
             if len(chunks) == 0:
                 logging.warning("⚠️ FILESEARCH RETURNED ZERO CHUNKS!")
                 print("⚠️ FileSearch returned 0 chunks - Claude will use framework examples")
@@ -190,6 +189,15 @@ Patient context:
                     c.retrieved_context.title,
                     len(c.retrieved_context.text)
                 )
+                
+                # ADD THIS: Log first 200 chars of each chunk
+                chunk_preview = c.retrieved_context.text[:200].replace('\n', ' ')
+                logging.info(
+                    "CHUNK_PREVIEW | source=%s | preview=%s...",
+                    c.retrieved_context.title,
+                    chunk_preview
+                )
+                
                 retrieved.append(
                     f"[From: {c.retrieved_context.title}]\n"
                     f"{c.retrieved_context.text}"
@@ -197,11 +205,24 @@ Patient context:
                 sources.add(c.retrieved_context.title)
 
             guideline_text = "\n\n---\n\n".join(retrieved)
+            
+            # ADD THIS: Log the complete guideline text structure
+            logging.info("GUIDELINE_TEXT_FINAL | total_chars=%d | num_sources=%d", 
+                        len(guideline_text), len(sources))
+            logging.info("SOURCES_LIST | sources=%s", list(sources))
+            
+            # ADD THIS: Print a sample of what Claude will receive
+            print("\n" + "="*80)
+            print("📋 SAMPLE OF RETRIEVED GUIDELINES BEING SENT TO CLAUDE:")
+            print("="*80)
+            print(guideline_text[:1000])  # First 1000 chars
+            print("...")
+            print(guideline_text[-500:])  # Last 500 chars
+            print("="*80 + "\n")
+
         else:
-            # ADD THIS: Handle case where grounding_metadata is missing
             logging.warning("⚠️ NO GROUNDING METADATA IN RESPONSE!")
             print("⚠️ Gemini response has no grounding_metadata")
-
     except Exception as e:
         print("⚠️ Gemini FileSearch error:", e)
         logging.error("FILESEARCH_ERROR | error=%s", str(e))
