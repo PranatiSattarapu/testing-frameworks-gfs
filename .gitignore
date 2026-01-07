@@ -7,8 +7,9 @@ guideline-upload.py
 keytest.py
 view_files.py
 drive_manager.py
-user_data\meera_vitals_tracking.csv
-user_data\meera_medical_history.json
-user_data\meera_lab_results.csv
+user_data/meera_vitals_tracking.csv
+user_data/meera_medical_history.json
+user_data/meera_lab_results.csv
+
 updated-docs/
 guidelines/
