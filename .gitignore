@@ -1,2 +1,14 @@
 .env 
 .streamlit/
+__pycache__/
+*.pyc
+filesearch_debug.py
+guideline-upload.py
+keytest.py
+view_files.py
+drive_manager.py
+prompt-testing\user_data\meera_vitals_tracking.csv
+prompt-testing\user_data\meera_medical_history.json
+prompt-testing\user_data\meera_lab_results.csv
+updated-docs/
+guidelines/
